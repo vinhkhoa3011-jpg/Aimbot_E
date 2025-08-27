@@ -55,29 +55,6 @@ local GetPlayers = __index(Players, "GetPlayers")
 local RequiredDistance, Typing, Running, ServiceConnections, Animation, OriginalSensitivity = 2000, false, false, {}
 local Connect, Disconnect = __index(game, "DescendantAdded").Connect
 
---[[
-local Degrade = false
-
-do
-	xpcall(function()
-		local TemporaryDrawing = Drawingnew("Line")
-		getrenderproperty = getupvalue(getmetatable(TemporaryDrawing).__index, 4)
-		setrenderproperty = getupvalue(getmetatable(TemporaryDrawing).__newindex, 4)
-		TemporaryDrawing.Remove(TemporaryDrawing)
-	end, function()
-		Degrade, getrenderproperty, setrenderproperty = true, function(Object, Key)
-			return Object[Key]
-		end, function(Object, Key, Value)
-			Object[Key] = Value
-		end
-	end)
-
-	local TemporaryConnection = Connect(__index(game, "DescendantAdded"), function() end)
-	Disconnect = TemporaryConnection.Disconnect
-	Disconnect(TemporaryConnection)
-end
-]]
-
 --// Checking for multiple processes
 
 if ExunysDeveloperAimbot and ExunysDeveloperAimbot.Exit then
@@ -103,13 +80,13 @@ getgenv().ExunysDeveloperAimbot = {
 		OffsetToMoveDirection = false,
 		OffsetIncrement = 15,
 
-		Sensitivity = 0, -- Animation length (in seconds) before fully locking onto target
-		Sensitivity2 = 3.5, -- mousemoverel Sensitivity
+		Sensitivity = 0,
+		Sensitivity2 = 3.5,
 
-		LockMode = 1, -- 1 = CFrame; 2 = mousemoverel
-		LockPart = "Head", -- Body part to lock on
+		LockMode = 1,
+		LockPart = "Head",
 
-		TriggerKey = Enum.KeyCode.E,
+		TriggerKey = {Enum.UserInputType.MouseButton2, Enum.KeyCode.E}, -- thêm nhiều phím
 		Toggle = false
 	},
 
@@ -170,7 +147,7 @@ end
 local CancelLock = function()
 	Environment.Locked = nil
 
-	local FOVCircle = Environment.FOVCircle--Degrade and Environment.FOVCircle or Environment.FOVCircle.__OBJECT
+	local FOVCircle = Environment.FOVCircle
 
 	setrenderproperty(FOVCircle, "Color", Environment.FOVSettings.Color)
 	__newindex(UserInputService, "MouseDeltaSensitivity", OriginalSensitivity)
@@ -228,16 +205,19 @@ local GetClosestPlayer = function()
 	end
 end
 
+local function IsTrigger(Input)
+	for _, key in ipairs(Environment.Settings.TriggerKey) do
+		if (Input.UserInputType == key) or (Input.KeyCode == key) then
+			return true
+		end
+	end
+	return false
+end
+
 local Load = function()
 	OriginalSensitivity = __index(UserInputService, "MouseDeltaSensitivity")
 
 	local Settings, FOVCircle, FOVCircleOutline, FOVSettings, Offset = Environment.Settings, Environment.FOVCircle, Environment.FOVCircleOutline, Environment.FOVSettings
-
-	--[[
-	if not Degrade then
-		FOVCircle, FOVCircleOutline = FOVCircle.__OBJECT, FOVCircleOutline.__OBJECT
-	end
-	]]
 
 	ServiceConnections.RenderSteppedConnection = Connect(__index(RunService, Environment.DeveloperSettings.UpdateMode), function()
 		local OffsetToMoveDirection, LockPart = Settings.OffsetToMoveDirection, Settings.LockPart
@@ -293,16 +273,13 @@ local Load = function()
 	end)
 
 	ServiceConnections.InputBeganConnection = Connect(__index(UserInputService, "InputBegan"), function(Input)
-		local TriggerKey, Toggle = Settings.TriggerKey, Settings.Toggle
-
 		if Typing then
 			return
 		end
 
-		if Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode == TriggerKey or Input.UserInputType == TriggerKey then
-			if Toggle then
+		if IsTrigger(Input) then
+			if Settings.Toggle then
 				Running = not Running
-
 				if not Running then
 					CancelLock()
 				end
@@ -313,13 +290,11 @@ local Load = function()
 	end)
 
 	ServiceConnections.InputEndedConnection = Connect(__index(UserInputService, "InputEnded"), function(Input)
-		local TriggerKey, Toggle = Settings.TriggerKey, Settings.Toggle
-
-		if Toggle or Typing then
+		if Settings.Toggle or Typing then
 			return
 		end
 
-		if Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode == TriggerKey or Input.UserInputType == TriggerKey then
+		if IsTrigger(Input) then
 			Running = false
 			CancelLock()
 		end
@@ -338,7 +313,7 @@ end)
 
 --// Functions
 
-function Environment.Exit(self) -- METHOD | ExunysDeveloperAimbot:Exit(<void>)
+function Environment.Exit(self)
 	assert(self, "EXUNYS_AIMBOT-V3.Exit: Missing parameter #1 \"self\" <table>.")
 
 	for Index, _ in next, ServiceConnections do
@@ -352,7 +327,7 @@ function Environment.Exit(self) -- METHOD | ExunysDeveloperAimbot:Exit(<void>)
 	getgenv().ExunysDeveloperAimbot = nil
 end
 
-function Environment.Restart() -- ExunysDeveloperAimbot.Restart(<void>)
+function Environment.Restart()
 	for Index, _ in next, ServiceConnections do
 		Disconnect(ServiceConnections[Index])
 	end
@@ -360,7 +335,7 @@ function Environment.Restart() -- ExunysDeveloperAimbot.Restart(<void>)
 	Load()
 end
 
-function Environment.Blacklist(self, Username) -- METHOD | ExunysDeveloperAimbot:Blacklist(<string> Player Name)
+function Environment.Blacklist(self, Username)
 	assert(self, "EXUNYS_AIMBOT-V3.Blacklist: Missing parameter #1 \"self\" <table>.")
 	assert(Username, "EXUNYS_AIMBOT-V3.Blacklist: Missing parameter #2 \"Username\" <string>.")
 
@@ -371,7 +346,7 @@ function Environment.Blacklist(self, Username) -- METHOD | ExunysDeveloperAimbot
 	self.Blacklisted[#self.Blacklisted + 1] = Username
 end
 
-function Environment.Whitelist(self, Username) -- METHOD | ExunysDeveloperAimbot:Whitelist(<string> Player Name)
+function Environment.Whitelist(self, Username)
 	assert(self, "EXUNYS_AIMBOT-V3.Whitelist: Missing parameter #1 \"self\" <table>.")
 	assert(Username, "EXUNYS_AIMBOT-V3.Whitelist: Missing parameter #2 \"Username\" <string>.")
 
@@ -386,7 +361,7 @@ function Environment.Whitelist(self, Username) -- METHOD | ExunysDeveloperAimbot
 	tableremove(self.Blacklisted, Index)
 end
 
-function Environment.GetClosestPlayer() -- ExunysDeveloperAimbot.GetClosestPlayer(<void>)
+function Environment.GetClosestPlayer()
 	GetClosestPlayer()
 	local Value = Environment.Locked
 	CancelLock()
@@ -394,7 +369,7 @@ function Environment.GetClosestPlayer() -- ExunysDeveloperAimbot.GetClosestPlaye
 	return Value
 end
 
-Environment.Load = Load -- ExunysDeveloperAimbot.Load()
+Environment.Load = Load
 
 setmetatable(Environment, {__call = Load})
 
