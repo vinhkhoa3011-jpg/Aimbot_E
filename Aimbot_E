@@ -1,4 +1,4 @@
---[[
+w--[[
 
 	Universal Aimbot Module by Exunys © CC0 1.0 Universal (2023 - 2024)
 	https://github.com/Exunys
@@ -86,7 +86,7 @@ getgenv().ExunysDeveloperAimbot = {
 		LockMode = 1,
 		LockPart = "Head",
 
-		TriggerKey = {Enum.UserInputType.MouseButton2, Enum.KeyCode.E}, -- thêm nhiều phím
+		TriggerKey = {Enum.UserInputType.MouseButton2, Enum.KeyCode.V}, -- thêm nhiều phím
 		Toggle = false
 	},
 
