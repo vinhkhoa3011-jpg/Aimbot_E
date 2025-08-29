@@ -86,7 +86,7 @@ getgenv().ExunysDeveloperAimbot = {
 		LockMode = 1,
 		LockPart = "Head",
 
-		TriggerKey = {Enum.UserInputType.MouseButton2, Enum.KeyCode.V}, -- thêm nhiều phím
+		TriggerKey = {Enum.UserInputType.MouseButton2, Enum.KeyCode.E}, -- thêm nhiều phím
 		Toggle = false
 	},
 
