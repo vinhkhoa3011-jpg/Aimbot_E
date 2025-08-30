@@ -66,8 +66,8 @@ getgenv().ExunysDeveloperAimbot = {
 		OffsetToMoveDirection = false,
 		OffsetIncrement = 15,
 
-		Sensitivity = 0.12,
-		Sensitivity2 = 4,
+		Sensitivity = 0.07,
+		Sensitivity2 = 3.5,
 
 		LockMode = 1,
 		LockPart = "Head",
